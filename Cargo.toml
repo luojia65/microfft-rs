@@ -1,0 +1,12 @@
+[package]
+name = "microfft"
+version = "0.1.0"
+authors = ["Jan Teske <jteske@posteo.net>"]
+edition = "2018"
+
+[dependencies.num-complex]
+version = "0.2"
+default-features = false
+
+[dev-dependencies]
+rustfft = "3"
