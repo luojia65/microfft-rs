@@ -1,29 +1,31 @@
 use crate::tables;
 use num_complex::Complex32;
 
-pub(crate) trait Fft {
+pub(crate) trait CFft {
+    type Half: CFft;
+
     const N: usize;
+    const LOG2_N: usize;
+
     const M: usize = Self::N / 2;
 
-    const LOG2_N: usize;
     const BITREV_TABLE: &'static [u16] = tables::BITREV[Self::LOG2_N];
     const TWIDDLE_TABLE: &'static [Complex32] = tables::TWIDDLE[Self::LOG2_N];
 
-    type Half: Fft;
-
     #[inline]
-    fn transform(x: &mut [Complex32]) {
+    fn transform(x: &mut [Complex32]) -> &mut [Complex32] {
         debug_assert_eq!(x.len(), Self::N);
 
         Self::bit_reverse(x);
         Self::compute_butterflies(x);
+        x
     }
 
     #[inline]
     fn bit_reverse(x: &mut [Complex32]) {
         debug_assert_eq!(x.len(), Self::N);
 
-        for i in 0..x.len() {
+        for i in 0..Self::N {
             let j = Self::BITREV_TABLE[i] as usize;
             x.swap(i, j);
         }
@@ -48,13 +50,13 @@ pub(crate) trait Fft {
     }
 }
 
-pub(crate) struct FftN1;
+pub(crate) struct CFftN1;
 
-impl Fft for FftN1 {
+impl CFft for CFftN1 {
+    type Half = Self;
+
     const N: usize = 1;
     const LOG2_N: usize = 0;
-
-    type Half = Self;
 
     #[inline]
     fn compute_butterflies(x: &mut [Complex32]) {
@@ -62,30 +64,30 @@ impl Fft for FftN1 {
     }
 }
 
-macro_rules! fft_impls {
-    ( $( $I:expr => ($N:expr, $FftI:ident, $Half:ident), )* ) => {
+macro_rules! cfft_impls {
+    ( $( $I:expr => ($N:expr, $CFftN:ident, $Half:ident), )* ) => {
         $(
-            pub(crate) struct $FftI;
+            pub(crate) struct $CFftN;
 
-            impl Fft for $FftI {
+            impl CFft for $CFftN {
+                type Half = $Half;
+
                 const N: usize = $N;
                 const LOG2_N: usize = $I;
-
-                type Half = $Half;
             }
         )*
     };
 }
 
-fft_impls! {
-     1 => (2, FftN2, FftN1),
-     2 => (4, FftN4, FftN2),
-     3 => (8, FftN8, FftN4),
-     4 => (16, FftN16, FftN8),
-     5 => (32, FftN32, FftN16),
-     6 => (64, FftN64, FftN32),
-     7 => (128, FftN128, FftN64),
-     8 => (256, FftN256, FftN128),
-     9 => (512, FftN512, FftN256),
-    10 => (1024, FftN1024, FftN512),
+cfft_impls! {
+     1 => (2, CFftN2, CFftN1),
+     2 => (4, CFftN4, CFftN2),
+     3 => (8, CFftN8, CFftN4),
+     4 => (16, CFftN16, CFftN8),
+     5 => (32, CFftN32, CFftN16),
+     6 => (64, CFftN64, CFftN32),
+     7 => (128, CFftN128, CFftN64),
+     8 => (256, CFftN256, CFftN128),
+     9 => (512, CFftN512, CFftN256),
+    10 => (1024, CFftN1024, CFftN512),
 }
