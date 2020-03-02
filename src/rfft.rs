@@ -1,6 +1,7 @@
 use crate::{cfft::*, tables};
 use core::{mem, slice};
 use num_complex::Complex32;
+use static_assertions::const_assert_eq;
 
 pub(crate) trait RFft {
     type Fft: CFft;
@@ -20,13 +21,20 @@ pub(crate) trait RFft {
         x
     }
 
+    #[inline]
     fn pack_complex(x: &mut [f32]) -> &mut [Complex32] {
-        debug_assert_eq!(x.len(), Self::N);
-        debug_assert_eq!(mem::size_of::<Complex32>(), mem::size_of::<f32>() * 2);
-        debug_assert_eq!(mem::align_of::<Complex32>(), mem::align_of::<f32>());
+        const_assert_eq!(mem::size_of::<Complex32>(), mem::size_of::<f32>() * 2);
+        const_assert_eq!(mem::align_of::<Complex32>(), mem::align_of::<f32>());
+        assert_eq!(x.len(), Self::N);
 
-        let data = x as *mut _ as *mut Complex32;
+        let data = x.as_ptr() as *mut Complex32;
         let len = Self::N / 2;
+
+        // Drop the old mutable reference to `data` before creating a
+        // new one to obey Rust's aliasing rules.
+        #[allow(clippy::drop_ref)]
+        drop(x);
+
         unsafe { slice::from_raw_parts_mut(data, len) }
     }
 
