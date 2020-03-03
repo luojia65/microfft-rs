@@ -1,4 +1,15 @@
 //! FFT on real inputs (RFFT)
+//!
+//! This implementation takes advantage of the symmetry properties of
+//! the FFT to compute an `N`-point RFFT by internally invoking an
+//! `N/2`-point CFFT, roughly doubling the computation speed compared
+//! to used a full `N`-point CFFT.
+//!
+//! The produced output is the first half out the output returned by
+//! the corresponding `N`-point CFFT, i.e. the real DC value and
+//! `N/2 - 1` positive-frequency terms. The negative-frequency terms
+//! are not computed, since they can be calculated from the
+//! positive-frequency terms and are therefore redundant.
 
 use crate::rfft::*;
 use num_complex::Complex32;
