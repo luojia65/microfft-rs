@@ -1,9 +1,39 @@
-//! Fast fourier transforms without heap-allocation.
+//! Library for computing fast fourier transforms on embedded systems.
 //!
-//! microfft provides an in-place implementation of the radix-2 DIT FFT
-//! algorithm. All computations are performed directly on the input buffer
-//! and require no additional allocations. This makes microfft suitable for
-//! `no_std` environments.
+//! microfft provides an in-place implementation of the Radix-2 FFT algorithm.
+//! All computations are performed directly on the input buffer and require no
+//! additional allocations. This makes microfft suitable for `no_std`
+//! environments.
+//!
+//! In addition to the standard FFT implementation on [`Complex32`] values
+//! ([`complex`]), an implementation working on real (`f32`) input values is
+//! provided ([`real`]). An `N`-point RFFT internally computes an `N/2`-point
+//! CFFT, making it roughly twice as fast a the complex variant.
+//!
+//! # Example
+//!
+//! ```
+//! use std::f32::consts::PI;
+//!
+//! // generate 16 samples of a sine wave at frequency 3
+//! let sample_count = 16;
+//! let signal_freq = 3.;
+//! let sample_interval = 1. / sample_count as f32;
+//! let mut samples: Vec<_> = (0..sample_count)
+//!     .map(|i| (2. * PI * signal_freq * sample_interval * i as f32).sin())
+//!     .collect();
+//!
+//! // compute the RFFT of the samples
+//! let spectrum = microfft::real::rfft_16(&mut samples);
+//!
+//! // the spectrum has a spike at index `signal_freq`
+//! let amplitudes: Vec<_> = spectrum.iter().map(|c| c.norm() as u32).collect();
+//! assert_eq!(&amplitudes, &[0, 0, 0, 8, 0, 0, 0, 0]);
+//! ```
+//!
+//! [`complex`]: complex/index.html
+//! [`real`]: real/index.html
+//! [`Complex32`]: type.Complex32.html
 
 #![no_std]
 #![deny(missing_docs)]
