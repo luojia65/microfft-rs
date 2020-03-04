@@ -85,6 +85,12 @@ limitation of the Radix-2 algorithm. Additionally, the maximum supported size
 is currently 1024, although this limit can easily be increased in the future
 as necessary.
 
+### `f64` Support
+
+This library currently only supports single-precision floating-point inputs.
+Similarly to the FFT size limit, this is a restriction that might be lifted
+in the future, should the need arise.
+
 ## License
 
 This project is licensed under the MIT license ([LICENSE](LICENSE) or
