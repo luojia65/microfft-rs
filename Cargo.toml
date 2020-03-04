@@ -2,6 +2,12 @@
 name = "microfft"
 version = "0.1.0"
 authors = ["Jan Teske <jteske@posteo.net>"]
+description = "Embedded-friendly Fast Fourier Transforms"
+repository = "https://gitlab.com/ra_kete/microfft-rs"
+readme = "README.md"
+keywords = ["fft", "dft", "fourier"]
+categories = ["algorithms", "embedded", "no-std", "science"]
+license = "MIT"
 edition = "2018"
 
 [dependencies]
@@ -13,3 +19,6 @@ default-features = false
 
 [dev-dependencies]
 rustfft = "3"
+
+[badges]
+gitlab = { repository = "ra_kete/microfft-rs" }
