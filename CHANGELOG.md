@@ -1,0 +1,16 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## 0.1.1 (2020-03-05)
+
+### Added
+
+- Support for FFT sizes 2048 and 4096.
+
+
+## 0.1.0 (2020-03-04)
+
+### Added
+
+- Support for complex and real FFTs up to size 1024.

@@ -1,6 +1,6 @@
 [package]
 name = "microfft"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Jan Teske <jteske@posteo.net>"]
 description = "Embedded-friendly Fast Fourier Transforms"
 repository = "https://gitlab.com/ra_kete/microfft-rs"
