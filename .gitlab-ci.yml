@@ -1,6 +1,14 @@
 stages:
   - test
 
+rust-msrv:
+  stage: test
+  image: rust:1.37.0
+  script:
+    - rustc --version && cargo --version
+    - cargo clean
+    - cargo test --verbose
+
 rust-latest:
   stage: test
   image: rust:latest

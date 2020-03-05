@@ -46,6 +46,10 @@ let amplitudes: Vec<_> = spectrum.iter().map(|c| c.norm() as u32).collect();
 assert_eq!(&amplitudes, &[0, 0, 0, 8, 0, 0, 0, 0]);
 ```
 
+## Requirements
+
+Requires Rust version **1.37.0** or newer.
+
 ## Limitations <a name="limitations"></a>
 
 microfft has a few limitations, mostly due to its focus on speed, that might
