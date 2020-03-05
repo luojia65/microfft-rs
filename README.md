@@ -70,9 +70,11 @@ that is computed:
 |   **32** |                192 |
 |   **64** |                384 |
 |  **128** |                768 |
-|  **256** |               1536 |
-|  **512** |               3072 |
-| **1024** |               6144 |
+|  **256** |              1,536 |
+|  **512** |              3,072 |
+| **1024** |              6,144 |
+| **2048** |             12,288 |
+| **4096** |             24,576 |
 
 These memory usage values apply to both CFFTs and RFFTs.
 
@@ -82,7 +84,7 @@ In addition, the code size also increases with FFT size.
 
 microfft only supports FFT point-sizes that are powers of two, a
 limitation of the Radix-2 algorithm. Additionally, the maximum supported size
-is currently 1024, although this limit can easily be increased in the future
+is currently 4096, although this limit can easily be increased in the future
 as necessary.
 
 ### `f64` Support

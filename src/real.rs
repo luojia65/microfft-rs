@@ -213,3 +213,43 @@ pub fn rfft_1024(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 1024);
     RFftN1024::transform(input)
 }
+
+/// Perform an in-place 2048-point RFFT.
+///
+/// # Example
+///
+/// ```
+/// use microfft::real::rfft_2048;
+///
+/// let mut input = [0.; 2048];
+/// let result = rfft_2048(&mut input);
+/// ```
+///
+/// # Panics
+///
+/// Panics if `input` has a length other than `2048`.
+#[inline]
+pub fn rfft_2048(input: &mut [f32]) -> &mut [Complex32] {
+    assert_eq!(input.len(), 2048);
+    RFftN2048::transform(input)
+}
+
+/// Perform an in-place 4096-point RFFT.
+///
+/// # Example
+///
+/// ```
+/// use microfft::real::rfft_4096;
+///
+/// let mut input = [0.; 4096];
+/// let result = rfft_4096(&mut input);
+/// ```
+///
+/// # Panics
+///
+/// Panics if `input` has a length other than `4096`.
+#[inline]
+pub fn rfft_4096(input: &mut [f32]) -> &mut [Complex32] {
+    assert_eq!(input.len(), 4096);
+    RFftN4096::transform(input)
+}

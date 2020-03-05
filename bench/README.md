@@ -3,11 +3,10 @@
 This code is used to run benchmarks on an embedded ARM Cortex-M4 system,
 specifically the [STM32F3DISCOVERY][1] board.
 
-It measures the number of CPU cycles required to compute both complex and
-real FFTs of all sizes currently supported by microfft. As a point of
-comparison, the same benchmarks are also performed against the
-[Fourier crate][2] which, at the time of writing, seems to be the only other
-Rust FFT library with `no_std` support.
+It measures the number of CPU cycles required to compute both complex and real
+FFTs for up to 1024 input values. As a point of comparison, the same benchmarks
+are also performed against the [Fourier crate][2] which, at the time of writing,
+seems to be the only other Rust FFT library with `no_std` support.
 
 ## Running
 
@@ -24,7 +23,7 @@ The results are printed to the OpenOCD session via semihosting.
 
 ## Results
 
-The following table lists the benchmark results (2020-03-02).
+The following table lists the benchmark results (2020-03-05).
 
 Measurements are in CPU cycles, so lower is better.
 

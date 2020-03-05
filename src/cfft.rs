@@ -90,4 +90,6 @@ cfft_impls! {
      8 => (256, CFftN256, CFftN128),
      9 => (512, CFftN512, CFftN256),
     10 => (1024, CFftN1024, CFftN512),
+    11 => (2048, CFftN2048, CFftN1024),
+    12 => (4096, CFftN4096, CFftN2048),
 }

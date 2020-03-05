@@ -202,3 +202,43 @@ pub fn cfft_1024(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 1024);
     CFftN1024::transform(input)
 }
+
+/// Perform an in-place 2048-point CFFT.
+///
+/// # Example
+///
+/// ```
+/// use microfft::{Complex32, complex::cfft_2048};
+///
+/// let mut input = [Complex32::default(); 2048];
+/// let result = cfft_2048(&mut input);
+/// ```
+///
+/// # Panics
+///
+/// Panics if `input` has a length other than `2048`.
+#[inline]
+pub fn cfft_2048(input: &mut [Complex32]) -> &mut [Complex32] {
+    assert_eq!(input.len(), 2048);
+    CFftN2048::transform(input)
+}
+
+/// Perform an in-place 4096-point CFFT.
+///
+/// # Example
+///
+/// ```
+/// use microfft::{Complex32, complex::cfft_4096};
+///
+/// let mut input = [Complex32::default(); 4096];
+/// let result = cfft_4096(&mut input);
+/// ```
+///
+/// # Panics
+///
+/// Panics if `input` has a length other than `4096`.
+#[inline]
+pub fn cfft_4096(input: &mut [Complex32]) -> &mut [Complex32] {
+    assert_eq!(input.len(), 4096);
+    CFftN4096::transform(input)
+}

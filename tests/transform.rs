@@ -11,7 +11,13 @@ fn rust_fft(input: &[Complex32]) -> Vec<Complex32> {
 }
 
 fn approx_eq(a: Complex32, b: Complex32) -> bool {
-    (a.re - b.re).abs() < 0.1 && (a.im - b.im).abs() < 0.1
+    fn approx_f32(x: f32, y: f32) -> bool {
+        let diff = (x - y).abs();
+        let rel_diff = if x != 0. { (diff / x).abs() } else { diff };
+        rel_diff < 0.02
+    }
+
+    approx_f32(a.re, b.re) && approx_f32(a.im, b.im)
 }
 
 fn assert_approx_eq(xa: &[Complex32], xb: &[Complex32]) {
@@ -23,24 +29,24 @@ fn assert_approx_eq(xa: &[Complex32], xb: &[Complex32]) {
 
 #[test]
 fn cfft() {
-    let mut input: Vec<_> = (0..1024)
+    let mut input: Vec<_> = (0..4096)
         .map(|i| i as f32)
         .map(|f| Complex32::new(f, f))
         .collect();
 
     let expected = rust_fft(&input);
-    let result = microfft::complex::cfft_1024(&mut input);
+    let result = microfft::complex::cfft_4096(&mut input);
 
     assert_approx_eq(result, &expected);
 }
 
 #[test]
 fn rfft() {
-    let mut input: Vec<_> = (0..1024).map(|i| i as f32).collect();
+    let mut input: Vec<_> = (0..4096).map(|i| i as f32).collect();
     let mut input_c: Vec<_> = input.iter().map(|f| Complex32::new(*f, 0.)).collect();
 
-    let expected = microfft::complex::cfft_1024(&mut input_c);
-    let result = microfft::real::rfft_1024(&mut input);
+    let expected = microfft::complex::cfft_4096(&mut input_c);
+    let result = microfft::real::rfft_4096(&mut input);
 
-    assert_approx_eq(result, &expected[..512]);
+    assert_approx_eq(result, &expected[..2048]);
 }
