@@ -7,10 +7,8 @@ pub(crate) trait CFft {
     const N: usize;
     const LOG2_N: usize;
 
-    const M: usize = Self::N / 2;
-
     const BITREV_TABLE: &'static [u16] = tables::BITREV[Self::LOG2_N];
-    const TWIDDLE_TABLE: &'static [Complex32] = tables::TWIDDLE[Self::LOG2_N];
+    const SINE_TABLE: &'static [f32] = tables::SINE[Self::LOG2_N - 2];
 
     #[inline]
     fn transform(x: &mut [Complex32]) -> &mut [Complex32] {
@@ -35,17 +33,49 @@ pub(crate) trait CFft {
     fn compute_butterflies(x: &mut [Complex32]) {
         debug_assert_eq!(x.len(), Self::N);
 
-        let m = Self::M;
+        let m = Self::N / 2;
+        let u = m / 2;
+
         Self::Half::compute_butterflies(&mut x[..m]);
         Self::Half::compute_butterflies(&mut x[m..]);
 
-        for k in 0..m {
-            let f = x[k];
-            let s = x[k + m];
-            let twiddle = Self::TWIDDLE_TABLE[k];
-            let prod = twiddle * s;
-            x[k] = f + prod;
-            x[k + m] = f - prod;
+        // [k = 0] twiddle factor: `1 + 0i`
+        let (x_0, x_m) = (x[0], x[m]);
+        x[0] = x_0 + x_m;
+        x[m] = x_0 - x_m;
+
+        // [k in [1, m/2)] twiddle factor:
+        //   - re from SINE table backwards and negative
+        //   - im from SINE table directly
+        for k in 1..u {
+            let re = Self::SINE_TABLE[u - k - 1] * -1.;
+            let im = Self::SINE_TABLE[k - 1];
+            let twiddle = Complex32::new(re, im);
+
+            let (x_k, x_km) = (x[k], x[k + m]);
+            let y = twiddle * x_km;
+            x[k] = x_k + y;
+            x[k + m] = x_k - y;
+        }
+
+        // [k = m/2] twiddle factor: `0 - 1i`
+        let (x_u, x_um) = (x[u], x[u + m]);
+        let y = x_um * Complex32::new(0., -1.);
+        x[u] = x_u + y;
+        x[u + m] = x_u - y;
+
+        // [k in (m/2, m)] twiddle factor:
+        //   - re from SINE table directly
+        //   - im from SINE table backwards
+        for k in (u + 1)..m {
+            let re = Self::SINE_TABLE[k - u - 1];
+            let im = Self::SINE_TABLE[m - k - 1];
+            let twiddle = Complex32::new(re, im);
+
+            let (x_k, x_km) = (x[k], x[k + m]);
+            let y = twiddle * x_km;
+            x[k] = x_k + y;
+            x[k + m] = x_k - y;
         }
     }
 }
@@ -60,7 +90,25 @@ impl CFft for CFftN1 {
 
     #[inline]
     fn compute_butterflies(x: &mut [Complex32]) {
-        debug_assert_eq!(x.len(), Self::N);
+        debug_assert_eq!(x.len(), 1);
+    }
+}
+
+pub(crate) struct CFftN2;
+
+impl CFft for CFftN2 {
+    type Half = CFftN1;
+
+    const N: usize = 2;
+    const LOG2_N: usize = 1;
+
+    #[inline]
+    fn compute_butterflies(x: &mut [Complex32]) {
+        debug_assert_eq!(x.len(), 2);
+
+        let (x_0, x_1) = (x[0], x[1]);
+        x[0] = x_0 + x_1;
+        x[1] = x_0 - x_1;
     }
 }
 
@@ -80,7 +128,6 @@ macro_rules! cfft_impls {
 }
 
 cfft_impls! {
-     1 => (2, CFftN2, CFftN1),
      2 => (4, CFftN4, CFftN2),
      3 => (8, CFftN8, CFftN4),
      4 => (16, CFftN16, CFftN8),
