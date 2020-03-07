@@ -3,7 +3,8 @@
 microfft is a library for computing fast fourier transforms that targets
 embedded systems. It provides an in-place implementation of the Radix-2 FFT
 algorithm. All computations are performed directly on the input buffer and
-require no additional allocations. This makes microfft suitable for `no_std` environments, like microcontrollers.
+require no additional allocations. This makes microfft suitable for `no_std`
+environments, like microcontrollers.
 
 Speed is achieved mainly by maintaining pre-computed tables of the necessary
 twiddle factors and bit-reversal indices. By replacing arithmetic operations
@@ -67,18 +68,18 @@ that is computed:
 
 | FFT size | table size [Bytes] |
 | -------: | -----------------: |
-|    **2** |                 12 |
-|    **4** |                 24 |
-|    **8** |                 48 |
-|   **16** |                 96 |
-|   **32** |                192 |
-|   **64** |                384 |
-|  **128** |                768 |
-|  **256** |              1,536 |
-|  **512** |              3,072 |
-| **1024** |              6,144 |
-| **2048** |             12,288 |
-| **4096** |             24,576 |
+|    **2** |                  4 |
+|    **4** |                  8 |
+|    **8** |                 20 |
+|   **16** |                 48 |
+|   **32** |                108 |
+|   **64** |                232 |
+|  **128** |                484 |
+|  **256** |                992 |
+|  **512** |              2,012 |
+| **1024** |              4,056 |
+| **2048** |              8,148 |
+| **4096** |             16,336 |
 
 These memory usage values apply to both CFFTs and RFFTs.
 
