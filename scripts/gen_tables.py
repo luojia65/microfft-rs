@@ -9,7 +9,6 @@ Used to create the file `src/tables.rs`.
 """
 
 import argparse
-import cmath
 import math
 
 
@@ -19,41 +18,37 @@ def parse_args():
     return parser.parse_args()
 
 
-def iter_n(max_n):
-    n = 1
-    while n <= max_n:
-        yield n
-        n *= 2
-
-
-def emit_uses():
-    print("use num_complex::Complex32;")
-    print()
-
-
-def emit_twiddle(max_n):
+def emit_sine(max_n):
     print("#[allow(clippy::approx_constant)]")
     print("#[allow(clippy::excessive_precision)]")
     print("#[allow(clippy::unreadable_literal)]")
-    print("pub(crate) const TWIDDLE: &[&[Complex32]] = &[")
-    for n in iter_n(max_n):
-        emit_twiddle_table(n)
+    print("pub(crate) const SINE: &[&[f32]] = &[")
+
+    n = 4
+    while n <= max_n:
+        emit_sine_table(n)
+        n *= 2
+
     print("];")
     print()
 
 
-def emit_twiddle_table(n):
+def emit_sine_table(n):
     print("    &[")
-    for k in range(n // 2):
-        twiddle = cmath.exp(-2j * math.pi * k / n)
-        print(f"        Complex32::new({twiddle.real}, {twiddle.imag}),")
+    for k in range(1, n // 4):
+        sine = math.sin(-2 * math.pi * k / n)
+        print(f"        {sine},")
     print("    ],")
 
 
 def emit_bitrev(max_n):
     print("pub(crate) const BITREV: &[&[u16]] = &[")
-    for n in iter_n(max_n):
+
+    n = 1
+    while n <= max_n:
         emit_bitrev_table(n)
+        n *= 2
+
     print("];")
     print()
 
@@ -78,8 +73,7 @@ def reverse_bits(num, nbits):
 
 def main():
     args = parse_args()
-    emit_uses()
-    emit_twiddle(args.N)
+    emit_sine(args.N)
     emit_bitrev(args.N)
 
 

@@ -4,11 +4,11 @@ use num_complex::Complex32;
 use static_assertions::const_assert_eq;
 
 pub(crate) trait RFft {
-    type Fft: CFft;
+    type CFft: CFft;
 
-    const N: usize = Self::Fft::N * 2;
-    const LOG2_N: usize = Self::Fft::LOG2_N + 1;
-    const TWIDDLE_TABLE: &'static [Complex32] = tables::TWIDDLE[Self::LOG2_N];
+    const N: usize = Self::CFft::N * 2;
+    const LOG2_N: usize = Self::CFft::LOG2_N + 1;
+    const SINE_TABLE: &'static [f32] = tables::SINE[Self::LOG2_N - 2];
 
     #[inline]
     fn transform(x: &mut [f32]) -> &mut [Complex32] {
@@ -16,7 +16,7 @@ pub(crate) trait RFft {
 
         let x = Self::pack_complex(x);
 
-        Self::Fft::transform(x);
+        Self::CFft::transform(x);
         Self::recombine(x);
         x
     }
@@ -40,33 +40,48 @@ pub(crate) trait RFft {
 
     #[inline]
     fn recombine(x: &mut [Complex32]) {
-        let n = Self::Fft::N;
+        let n = Self::CFft::N;
         debug_assert_eq!(x.len(), n);
 
         // DC
         let x0 = x[0];
         x[0] = Complex32::new(x0.re + x0.im, 0.);
 
-        let m = n / 2 + 1;
+        let m = n / 2;
         for k in 1..m {
-            let xk = x[k];
-            let xnk = x[n - k];
+            let twiddle_re = Self::SINE_TABLE[m - k - 1] * -1.;
+            let twiddle_im = Self::SINE_TABLE[k - 1];
 
-            let sum = (xk + xnk) / 2.;
-            let diff = (xk - xnk) / 2.;
+            let (x_k, x_nk) = (x[k], x[n - k]);
+            let sum = (x_k + x_nk) / 2.;
+            let diff = (x_k - x_nk) / 2.;
 
-            let twiddle = Self::TWIDDLE_TABLE[k];
             x[k] = Complex32::new(
-                sum.re + twiddle.re * sum.im + twiddle.im * diff.re,
-                diff.im + twiddle.im * sum.im - twiddle.re * diff.re,
+                sum.re + twiddle_re * sum.im + twiddle_im * diff.re,
+                diff.im + twiddle_im * sum.im - twiddle_re * diff.re,
             );
-
-            let twiddle = Self::TWIDDLE_TABLE[n - k];
             x[n - k] = Complex32::new(
-                sum.re + twiddle.re * sum.im - twiddle.im * diff.re,
-                -diff.im + twiddle.im * sum.im + twiddle.re * diff.re,
+                sum.re - twiddle_re * sum.im - twiddle_im * diff.re,
+                -diff.im + twiddle_im * sum.im - twiddle_re * diff.re,
             );
         }
+
+        x[m] *= Complex32::new(0., -1.);
+    }
+}
+
+pub(crate) struct RFftN2;
+
+impl RFft for RFftN2 {
+    type CFft = CFftN1;
+
+    #[inline]
+    fn recombine(x: &mut [Complex32]) {
+        debug_assert_eq!(x.len(), 1);
+
+        // DC
+        let x0 = x[0];
+        x[0] = Complex32::new(x0.re + x0.im, 0.);
     }
 }
 
@@ -76,14 +91,13 @@ macro_rules! rfft_impls {
             pub(crate) struct $RFftN;
 
             impl RFft for $RFftN {
-                type Fft = $CFftN;
+                type CFft = $CFftN;
             }
         )*
     };
 }
 
 rfft_impls! {
-    (RFftN2, CFftN1),
     (RFftN4, CFftN2),
     (RFftN8, CFftN4),
     (RFftN16, CFftN8),
