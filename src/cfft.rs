@@ -1,5 +1,4 @@
 use crate::tables;
-use core::mem;
 use num_complex::Complex32;
 
 pub(crate) trait CFft {
@@ -38,9 +37,9 @@ pub(crate) trait CFft {
     fn bit_reverse_reorder(x: &mut [Complex32]) {
         debug_assert_eq!(x.len(), Self::N);
 
+        let shift = core::mem::size_of::<usize>() * 8 - Self::LOG2_N;
         for i in 0..Self::N {
             let rev = i.reverse_bits();
-            let shift = mem::size_of_val(&rev) * 8 - Self::LOG2_N;
             let j = rev >> shift;
             if j > i {
                 x.swap(i, j);
