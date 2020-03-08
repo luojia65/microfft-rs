@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Bitrev tables are not used anymore by default, instead the bit-reversed
+  indices are computed directly at runtime. This significantly reduces the
+  memory usage of microfft. On architectures that provide a dedicated
+  bit-reversal instruction (like `RBIT` on ARMv7), speed is also increased.
+  The `bitrev-tables` feature can be enabled to still opt into using bitrev
+  tables.
+
+
 ## 0.1.2 (2020-03-07)
 
 ### Changed

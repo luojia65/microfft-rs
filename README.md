@@ -6,13 +6,13 @@ algorithm. All computations are performed directly on the input buffer and
 require no additional allocations. This makes microfft suitable for `no_std`
 environments, like microcontrollers.
 
-Speed is achieved mainly by maintaining pre-computed tables of the necessary
-twiddle factors and bit-reversal indices. By replacing arithmetic operations
+Speed is achieved mainly by maintaining pre-computed sine tables that are used
+to look up the necessary twiddle factors. By replacing arithmetic operations
 with simple memory lookups, we reduce a) the number of CPU cycles spent and
 b) the overall complexity and size of the code, which in turn leads to less
 pressure on the instruction cache. Unfortunately, those pre-computed tables
 also claim a considerable amount of memory, which might be a deal-breaker for
-some embedded projects (see [Limitations](#limitations)).
+some embedded projects (see [Memory Usage](#memory-usage)).
 
 microfft also implements a specialized algorithm for FFTs on real (instead
 of complex) values. Naively one would calculate a real FFT simply by converting
@@ -51,35 +51,50 @@ assert_eq!(&amplitudes, &[0, 0, 0, 8, 0, 0, 0, 0]);
 
 Requires Rust version **1.37.0** or newer.
 
-## Limitations <a name="limitations"></a>
+## Optional Features
+
+microfft provides the following optional features:
+
+- `bitrev-tables`: Enables the use of pre-computed tables of bit-reversed
+  indices required for the reordering of input values performed at the start
+  of each FFT. If this feature is disabled, the bit-reversals are computed at
+  runtime instead.
+
+  Enabling this feature significantly increases the memory usage of microfft
+  (see [Memory Usage](#memory-usage)). While it can speed up FFT computation
+  on some systems, there are also architectures that provide dedicated
+  bit-reversal instructions (like `RBIT` on ARMv7). On such architectures,
+  switching on bitrev tables is usually detrimental to performance.
+
+## Limitations
 
 microfft has a few limitations, mostly due to its focus on speed, that might
 make it unsuitable for some embedded projects. You should know about these
 if you consider using this library:
 
-### Memory Usage
+### Memory Usage <a name="memory-usage"></a>
 
-The use of pre-computed tables for twiddle factors and bit reversal means that
-microfft has considerable requirements on read-only memory. If your chip
-doesn't have much flash to begin with, this can be an issue.
+The use of pre-computed sine and bitrev tables means that microfft has
+considerable requirements on read-only memory. If your chip doesn't have much
+flash to begin with, this can be an issue.
 
 The amount of memory required for tables depends on the point-size of the FFT
-that is computed:
+that is computed, and on whether the `bitrev-tables` feature is enabled:
 
-| FFT size | table size [Bytes] |
-| -------: | -----------------: |
-|    **2** |                  4 |
-|    **4** |                  8 |
-|    **8** |                 20 |
-|   **16** |                 48 |
-|   **32** |                108 |
-|   **64** |                232 |
-|  **128** |                484 |
-|  **256** |                992 |
-|  **512** |              2,012 |
-| **1024** |              4,056 |
-| **2048** |              8,148 |
-| **4096** |             16,336 |
+| FFT size | sine tables [Bytes] | sine + bitrev tables [Bytes] |
+| -------: | ------------------: | ---------------------------: |
+|    **2** |                   0 |                            4 |
+|    **4** |                   0 |                            8 |
+|    **8** |                   4 |                           20 |
+|   **16** |                  16 |                           48 |
+|   **32** |                  44 |                          108 |
+|   **64** |                 104 |                          232 |
+|  **128** |                 228 |                          484 |
+|  **256** |                 480 |                          992 |
+|  **512** |                 988 |                        2,012 |
+| **1024** |               2,008 |                        4,056 |
+| **2048** |               4,052 |                        8,148 |
+| **4096** |               8,144 |                       16,336 |
 
 These memory usage values apply to both CFFTs and RFFTs.
 

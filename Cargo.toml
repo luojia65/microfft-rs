@@ -20,5 +20,8 @@ default-features = false
 [dev-dependencies]
 rustfft = "3"
 
+[features]
+bitrev-tables = []
+
 [badges]
 gitlab = { repository = "ra_kete/microfft-rs" }

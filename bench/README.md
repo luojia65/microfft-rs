@@ -23,22 +23,22 @@ The results are printed to the OpenOCD session via semihosting.
 
 ## Results
 
-The following table lists the benchmark results (2020-03-07).
+The following table lists the benchmark results (2020-03-08).
 
 Measurements are in CPU cycles, so lower is better.
 
 | FFT size | microfft (CFFT) | microfft (RFFT) | Fourier (CFFT) |
 | -------: | --------------: | --------------: | -------------: |
-|    **2** |              25 |              13 |            722 |
-|    **4** |              70 |              34 |            801 |
-|    **8** |             185 |             106 |          1,609 |
-|   **16** |             656 |             353 |          2,356 |
-|   **32** |           1,929 |           1,117 |          4,406 |
-|   **64** |           6,271 |           2,978 |         11,515 |
-|  **128** |          15,644 |           8,408 |         21,309 |
-|  **256** |          38,076 |          19,878 |         44,501 |
-|  **512** |          90,363 |          47,451 |        103,872 |
-| **1024** |         213,349 |         107,376 |        200,815 |
+|    **2** |              25 |              13 |            728 |
+|    **4** |              71 |              32 |            798 |
+|    **8** |             189 |             107 |          1,611 |
+|   **16** |             654 |             357 |          2,353 |
+|   **32** |           2,279 |           1,127 |          4,411 |
+|   **64** |           6,034 |           3,319 |         11,515 |
+|  **128** |          15,261 |           8,189 |         21,307 |
+|  **256** |          36,716 |          19,438 |         44,499 |
+|  **512** |          87,900 |          46,128 |        103,878 |
+| **1024** |         200,214 |         104,768 |        200,818 |
 
 [1]: https://www.st.com/en/evaluation-tools/stm32f3discovery.html
 [2]: https://crates.io/crates/fourier

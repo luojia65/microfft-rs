@@ -42,6 +42,7 @@ def emit_sine_table(n):
 
 
 def emit_bitrev(max_n):
+    print('#[cfg(feature = "bitrev-tables")]')
     print("pub(crate) const BITREV: &[&[u16]] = &[")
 
     n = 1

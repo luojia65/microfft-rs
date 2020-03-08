@@ -72,9 +72,6 @@ macro_rules! rfft_tests {
                 let expected = microfft::complex::$cfft_name(&mut input_c);
                 let result = microfft::real::$name(&mut input);
 
-                println!("{:?}", result);
-                println!("{:?}", &expected[..($N / 2)]);
-
                 assert_approx_eq(result, &expected[..($N / 2)]);
             }
         )*

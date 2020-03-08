@@ -2059,6 +2059,7 @@ pub(crate) const SINE: &[&[f32]] = &[
     ],
 ];
 
+#[cfg(feature = "bitrev-tables")]
 pub(crate) const BITREV: &[&[u16]] = &[
     &[0],
     &[0, 1],
