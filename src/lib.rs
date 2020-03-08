@@ -47,3 +47,22 @@ pub use num_complex::Complex32;
 mod cfft;
 mod rfft;
 mod tables;
+
+use static_assertions::assert_cfg;
+
+assert_cfg!(
+    any(
+        feature = "maxn-4",
+        feature = "maxn-8",
+        feature = "maxn-16",
+        feature = "maxn-32",
+        feature = "maxn-64",
+        feature = "maxn-128",
+        feature = "maxn-256",
+        feature = "maxn-512",
+        feature = "maxn-1024",
+        feature = "maxn-2048",
+        feature = "maxn-4096",
+    ),
+    "One of the `maxn-*` features of this crate must be set."
+);

@@ -57,6 +57,18 @@ pub fn cfft_4(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `8`.
+#[cfg(any(
+    feature = "maxn-8",
+    feature = "maxn-16",
+    feature = "maxn-32",
+    feature = "maxn-64",
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn cfft_8(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 8);
@@ -77,6 +89,17 @@ pub fn cfft_8(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `16`.
+#[cfg(any(
+    feature = "maxn-16",
+    feature = "maxn-32",
+    feature = "maxn-64",
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn cfft_16(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 16);
@@ -97,6 +120,16 @@ pub fn cfft_16(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `32`.
+#[cfg(any(
+    feature = "maxn-32",
+    feature = "maxn-64",
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn cfft_32(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 32);
@@ -117,6 +150,15 @@ pub fn cfft_32(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `64`.
+#[cfg(any(
+    feature = "maxn-64",
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn cfft_64(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 64);
@@ -137,6 +179,14 @@ pub fn cfft_64(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `128`.
+#[cfg(any(
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn cfft_128(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 128);
@@ -157,6 +207,13 @@ pub fn cfft_128(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `256`.
+#[cfg(any(
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn cfft_256(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 256);
@@ -177,6 +234,12 @@ pub fn cfft_256(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `512`.
+#[cfg(any(
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn cfft_512(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 512);
@@ -197,6 +260,7 @@ pub fn cfft_512(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `1024`.
+#[cfg(any(feature = "maxn-1024", feature = "maxn-2048", feature = "maxn-4096"))]
 #[inline]
 pub fn cfft_1024(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 1024);
@@ -217,6 +281,7 @@ pub fn cfft_1024(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `2048`.
+#[cfg(any(feature = "maxn-2048", feature = "maxn-4096"))]
 #[inline]
 pub fn cfft_2048(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 2048);
@@ -237,6 +302,7 @@ pub fn cfft_2048(input: &mut [Complex32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `4096`.
+#[cfg(any(feature = "maxn-4096"))]
 #[inline]
 pub fn cfft_4096(input: &mut [Complex32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 4096);
