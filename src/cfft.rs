@@ -1,4 +1,5 @@
 use crate::tables;
+use core::mem;
 use num_complex::Complex32;
 
 pub(crate) trait CFft {
@@ -7,25 +8,43 @@ pub(crate) trait CFft {
     const N: usize;
     const LOG2_N: usize;
 
-    const BITREV_TABLE: &'static [u16] = tables::BITREV[Self::LOG2_N];
     const SINE_TABLE: &'static [f32] = tables::SINE[Self::LOG2_N - 2];
+
+    #[cfg(feature = "bitrev-tables")]
+    const BITREV_TABLE: &'static [u16] = tables::BITREV[Self::LOG2_N];
 
     #[inline]
     fn transform(x: &mut [Complex32]) -> &mut [Complex32] {
         debug_assert_eq!(x.len(), Self::N);
 
-        Self::bit_reverse(x);
+        Self::bit_reverse_reorder(x);
         Self::compute_butterflies(x);
         x
     }
 
+    #[cfg(feature = "bitrev-tables")]
     #[inline]
-    fn bit_reverse(x: &mut [Complex32]) {
+    fn bit_reverse_reorder(x: &mut [Complex32]) {
         debug_assert_eq!(x.len(), Self::N);
 
         for i in 0..Self::N {
             let j = Self::BITREV_TABLE[i] as usize;
             x.swap(i, j);
+        }
+    }
+
+    #[cfg(not(feature = "bitrev-tables"))]
+    #[inline]
+    fn bit_reverse_reorder(x: &mut [Complex32]) {
+        debug_assert_eq!(x.len(), Self::N);
+
+        for i in 0..Self::N {
+            let rev = i.reverse_bits();
+            let shift = mem::size_of_val(&rev) * 8 - Self::LOG2_N;
+            let j = rev >> shift;
+            if j > i {
+                x.swap(i, j);
+            }
         }
     }
 
@@ -87,6 +106,11 @@ impl CFft for CFftN1 {
 
     const N: usize = 1;
     const LOG2_N: usize = 0;
+
+    #[inline]
+    fn bit_reverse_reorder(x: &mut [Complex32]) {
+        debug_assert_eq!(x.len(), 1);
+    }
 
     #[inline]
     fn compute_butterflies(x: &mut [Complex32]) {
