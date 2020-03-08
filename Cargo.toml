@@ -21,7 +21,19 @@ default-features = false
 rustfft = "3"
 
 [features]
+default = ["maxn-4096"]
 bitrev-tables = []
+maxn-4 = []
+maxn-8 = []
+maxn-16 = []
+maxn-32 = []
+maxn-64 = []
+maxn-128 = []
+maxn-256 = []
+maxn-512 = []
+maxn-1024 = []
+maxn-2048 = []
+maxn-4096 = []
 
 [badges]
 gitlab = { repository = "ra_kete/microfft-rs" }

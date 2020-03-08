@@ -68,6 +68,18 @@ pub fn rfft_4(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `8`.
+#[cfg(any(
+    feature = "maxn-8",
+    feature = "maxn-16",
+    feature = "maxn-32",
+    feature = "maxn-64",
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn rfft_8(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 8);
@@ -88,6 +100,17 @@ pub fn rfft_8(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `16`.
+#[cfg(any(
+    feature = "maxn-16",
+    feature = "maxn-32",
+    feature = "maxn-64",
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn rfft_16(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 16);
@@ -108,6 +131,16 @@ pub fn rfft_16(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `32`.
+#[cfg(any(
+    feature = "maxn-32",
+    feature = "maxn-64",
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn rfft_32(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 32);
@@ -128,6 +161,15 @@ pub fn rfft_32(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `64`.
+#[cfg(any(
+    feature = "maxn-64",
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn rfft_64(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 64);
@@ -148,6 +190,14 @@ pub fn rfft_64(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `128`.
+#[cfg(any(
+    feature = "maxn-128",
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn rfft_128(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 128);
@@ -168,6 +218,13 @@ pub fn rfft_128(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `256`.
+#[cfg(any(
+    feature = "maxn-256",
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn rfft_256(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 256);
@@ -188,6 +245,12 @@ pub fn rfft_256(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `512`.
+#[cfg(any(
+    feature = "maxn-512",
+    feature = "maxn-1024",
+    feature = "maxn-2048",
+    feature = "maxn-4096",
+))]
 #[inline]
 pub fn rfft_512(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 512);
@@ -208,6 +271,7 @@ pub fn rfft_512(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `1024`.
+#[cfg(any(feature = "maxn-1024", feature = "maxn-2048", feature = "maxn-4096"))]
 #[inline]
 pub fn rfft_1024(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 1024);
@@ -228,6 +292,7 @@ pub fn rfft_1024(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `2048`.
+#[cfg(any(feature = "maxn-2048", feature = "maxn-4096"))]
 #[inline]
 pub fn rfft_2048(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 2048);
@@ -248,6 +313,7 @@ pub fn rfft_2048(input: &mut [f32]) -> &mut [Complex32] {
 /// # Panics
 ///
 /// Panics if `input` has a length other than `4096`.
+#[cfg(any(feature = "maxn-4096"))]
 #[inline]
 pub fn rfft_4096(input: &mut [f32]) -> &mut [Complex32] {
     assert_eq!(input.len(), 4096);

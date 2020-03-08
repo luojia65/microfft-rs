@@ -7,8 +7,6 @@ pub(crate) trait CFft {
     const N: usize;
     const LOG2_N: usize;
 
-    const SINE_TABLE: &'static [f32] = tables::SINE[Self::LOG2_N - 2];
-
     #[cfg(feature = "bitrev-tables")]
     const BITREV_TABLE: &'static [u16] = tables::BITREV[Self::LOG2_N];
 
@@ -54,6 +52,9 @@ pub(crate) trait CFft {
         let m = Self::N / 2;
         let u = m / 2;
 
+        let table_len = tables::SINE.len();
+        let table_stride = (table_len + 1) * 4 / Self::N;
+
         Self::Half::compute_butterflies(&mut x[..m]);
         Self::Half::compute_butterflies(&mut x[m..]);
 
@@ -66,8 +67,9 @@ pub(crate) trait CFft {
         //   - re from SINE table backwards and negative
         //   - im from SINE table directly
         for k in 1..u {
-            let re = Self::SINE_TABLE[u - k - 1] * -1.;
-            let im = Self::SINE_TABLE[k - 1];
+            let s = k * table_stride;
+            let re = tables::SINE[table_len - s] * -1.;
+            let im = tables::SINE[s - 1];
             let twiddle = Complex32::new(re, im);
 
             let (x_k, x_km) = (x[k], x[k + m]);
@@ -86,8 +88,9 @@ pub(crate) trait CFft {
         //   - re from SINE table directly
         //   - im from SINE table backwards
         for k in (u + 1)..m {
-            let re = Self::SINE_TABLE[k - u - 1];
-            let im = Self::SINE_TABLE[m - k - 1];
+            let s = (k - u) * table_stride;
+            let re = tables::SINE[s - 1];
+            let im = tables::SINE[table_len - s];
             let twiddle = Complex32::new(re, im);
 
             let (x_k, x_km) = (x[k], x[k + m]);
@@ -138,6 +141,7 @@ impl CFft for CFftN2 {
 macro_rules! cfft_impls {
     ( $( $I:expr => ($N:expr, $CFftN:ident, $Half:ident), )* ) => {
         $(
+            #[allow(dead_code)]
             pub(crate) struct $CFftN;
 
             impl CFft for $CFftN {

@@ -19,26 +19,22 @@ def parse_args():
 
 
 def emit_sine(max_n):
-    print("#[allow(clippy::approx_constant)]")
-    print("#[allow(clippy::excessive_precision)]")
-    print("#[allow(clippy::unreadable_literal)]")
-    print("pub(crate) const SINE: &[&[f32]] = &[")
-
     n = 4
     while n <= max_n:
         emit_sine_table(n)
         n *= 2
 
-    print("];")
-    print()
-
 
 def emit_sine_table(n):
-    print("    &[")
+    print(f'#[cfg(feature = "maxn-{n}")]')
+    print(f"#[allow(clippy::excessive_precision)]")
+    print(f"#[allow(clippy::unreadable_literal)]")
+    print("pub(crate) const SINE: &[f32] = &[")
     for k in range(1, n // 4):
         sine = math.sin(-2 * math.pi * k / n)
         print(f"        {sine},")
-    print("    ],")
+    print("];")
+    print()
 
 
 def emit_bitrev(max_n):

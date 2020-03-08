@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Store only the largest sine table, instead of one for each FFT size. By
+  default this is the table for the 4096-point FFT (the largest supported one),
+  but smaller ones can be selected via the new `maxn-*` crate features.
+
+
 ## 0.2.0 (2020-03-08)
 
 ### Changed
