@@ -25,14 +25,8 @@ pub(crate) trait RFft {
         assert_eq_align!(Complex32, f32);
         assert_eq!(x.len(), Self::N);
 
-        let data = x.as_ptr() as *mut Complex32;
         let len = Self::N / 2;
-
-        // Drop the old mutable reference to `data` before creating a
-        // new one to obey Rust's aliasing rules.
-        #[allow(clippy::drop_ref)]
-        drop(x);
-
+        let data = x.as_mut_ptr().cast::<Complex32>();
         unsafe { slice::from_raw_parts_mut(data, len) }
     }
 
