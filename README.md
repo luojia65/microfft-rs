@@ -48,7 +48,7 @@ assert_eq!(&amplitudes, &[0, 0, 0, 8, 0, 0, 0, 0]);
 
 ## Requirements
 
-Requires Rust version **1.37.0** or newer.
+Requires Rust version **1.38.0** or newer.
 
 ## Sine Tables
 

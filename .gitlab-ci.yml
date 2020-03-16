@@ -3,7 +3,7 @@ stages:
 
 rust-msrv:
   stage: test
-  image: rust:1.37.0
+  image: rust:1.38.0
   script:
     - rustc --version && cargo --version
     - cargo clean
