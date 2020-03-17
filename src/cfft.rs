@@ -14,8 +14,8 @@ pub(crate) trait CFft {
     fn transform(x: &mut [Complex32]) -> &mut [Complex32] {
         debug_assert_eq!(x.len(), Self::N);
 
-        Self::bit_reverse_reorder(x);
         Self::compute_butterflies(x);
+        Self::bit_reverse_reorder(x);
         x
     }
 
@@ -55,9 +55,6 @@ pub(crate) trait CFft {
         let table_len = tables::SINE.len();
         let table_stride = (table_len + 1) * 4 / Self::N;
 
-        Self::Half::compute_butterflies(&mut x[..m]);
-        Self::Half::compute_butterflies(&mut x[m..]);
-
         // [k = 0] twiddle factor: `1 + 0i`
         let (x_0, x_m) = (x[0], x[m]);
         x[0] = x_0 + x_m;
@@ -73,16 +70,15 @@ pub(crate) trait CFft {
             let twiddle = Complex32::new(re, im);
 
             let (x_k, x_km) = (x[k], x[k + m]);
-            let y = twiddle * x_km;
-            x[k] = x_k + y;
-            x[k + m] = x_k - y;
+            x[k] = x_k + x_km;
+            x[k + m] = (x_k - x_km) * twiddle;
         }
 
         // [k = m/2] twiddle factor: `0 - 1i`
         let (x_u, x_um) = (x[u], x[u + m]);
-        let y = x_um * Complex32::new(0., -1.);
-        x[u] = x_u + y;
-        x[u + m] = x_u - y;
+        let twiddle = Complex32::new(0., -1.);
+        x[u] = x_u + x_um;
+        x[u + m] = (x_u - x_um) * twiddle;
 
         // [k in (m/2, m)] twiddle factor:
         //   - re from SINE table directly
@@ -94,10 +90,12 @@ pub(crate) trait CFft {
             let twiddle = Complex32::new(re, im);
 
             let (x_k, x_km) = (x[k], x[k + m]);
-            let y = twiddle * x_km;
-            x[k] = x_k + y;
-            x[k + m] = x_k - y;
+            x[k] = x_k + x_km;
+            x[k + m] = (x_k - x_km) * twiddle;
         }
+
+        Self::Half::compute_butterflies(&mut x[..m]);
+        Self::Half::compute_butterflies(&mut x[m..]);
     }
 }
 
