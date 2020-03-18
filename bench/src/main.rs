@@ -1,16 +1,12 @@
 #![no_std]
 #![no_main]
+#![allow(dead_code)]
 
+use cortex_m::iprint;
 use cortex_m_rt::entry;
-use cortex_m_semihosting::hprintln;
-use fourier::Fft;
 use hal::{prelude::*, time::MonoTimer};
-use heapless::{consts::U1024, Vec};
 use num_complex::Complex32;
 use panic_semihosting as _;
-
-static mut XC: Vec<Complex32, U1024> = Vec(heapless::i::Vec::new());
-static mut XF: Vec<f32, U1024> = Vec(heapless::i::Vec::new());
 
 #[entry]
 fn main() -> ! {
@@ -28,30 +24,65 @@ fn main() -> ! {
         .pclk2(72.mhz())
         .freeze(&mut flash.acr);
 
-    let xc = unsafe { &mut XC };
-    (0..1024)
-        .map(|i| Complex32::new(i as f32, 0.))
-        .for_each(|c| xc.push(c).unwrap());
-
-    let xf = unsafe { &mut XF };
-    (0..1024)
-        .map(|i| i as f32)
-        .for_each(|f| xf.push(f).unwrap());
-
     let timer = MonoTimer::new(core.DWT, clocks);
+    let cycles = bench::run(timer);
 
-    bench_2(timer, xc, xf);
-    bench_4(timer, xc, xf);
-    bench_8(timer, xc, xf);
-    bench_16(timer, xc, xf);
-    bench_32(timer, xc, xf);
-    bench_64(timer, xc, xf);
-    bench_128(timer, xc, xf);
-    bench_256(timer, xc, xf);
-    bench_512(timer, xc, xf);
-    bench_1024(timer, xc, xf);
+    let mut itm = core.ITM;
+    iprint!(&mut itm.stim[0], "{}", cycles);
 
     panic!("bench done");
+}
+
+#[cfg(feature = "microfft-c")]
+mod bench {
+    use super::{n, timeit, Complex32, MonoTimer};
+    use heapless::{consts::U4096, Vec};
+
+    static mut X: Vec<Complex32, U4096> = Vec(heapless::i::Vec::new());
+
+    pub fn run(timer: MonoTimer) -> u32 {
+        let x = unsafe { &mut X };
+        for i in 0..n::N {
+            x.push(Complex32::new(i as f32, 0.)).unwrap();
+        }
+
+        timeit(timer, || n::CFFT(x))
+    }
+}
+
+#[cfg(feature = "microfft-r")]
+mod bench {
+    use super::{n, timeit, MonoTimer};
+    use heapless::{consts::U4096, Vec};
+
+    static mut X: Vec<f32, U4096> = Vec(heapless::i::Vec::new());
+
+    pub fn run(timer: MonoTimer) -> u32 {
+        let x = unsafe { &mut X };
+        for i in 0..n::N {
+            x.push(i as f32).unwrap();
+        }
+
+        timeit(timer, || n::RFFT(x))
+    }
+}
+
+#[cfg(feature = "fourier-c")]
+mod bench {
+    use super::{n, timeit, Complex32, MonoTimer};
+    use fourier::Fft;
+    use heapless::{consts::U4096, Vec};
+
+    static mut X: Vec<Complex32, U4096> = Vec(heapless::i::Vec::new());
+
+    pub fn run(timer: MonoTimer) -> u32 {
+        let x = unsafe { &mut X };
+        for i in 0..n::N {
+            x.push(Complex32::new(i as f32, 0.)).unwrap();
+        }
+
+        timeit(timer, || n::Fourier.fft_in_place(x))
+    }
 }
 
 fn timeit<F, R>(timer: MonoTimer, f: F) -> u32
@@ -63,40 +94,115 @@ where
     instant.elapsed()
 }
 
-macro_rules! benches {
-    ( $( $N:expr => ($bench_N:ident, $cfft_N:ident, $rfft_N:ident, $FourierN:ident), )* ) => {
-        $(
-            #[fourier::static_fft(f32, $N)]
-            struct $FourierN;
+type FnCfft = fn(&mut [Complex32]) -> &mut [Complex32];
+type FnRfft = fn(&mut [f32]) -> &mut [Complex32];
 
-            fn $bench_N(timer: MonoTimer, xc: &mut [Complex32], xf: &mut [f32]) {
-                hprintln!("FFT {}pt:", $N).unwrap();
+#[cfg(feature = "n-4")]
+mod n {
+    pub const N: usize = 4;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_4;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_4;
 
-                let xc = &mut xc[..$N];
-                let xf = &mut xf[..$N];
-
-                let cycles = timeit(timer, || microfft::complex::$cfft_N(xc));
-                hprintln!("- microfft (c): {}", cycles).unwrap();
-
-                let cycles = timeit(timer, || microfft::real::$rfft_N(xf));
-                hprintln!("- microfft (r): {}", cycles).unwrap();
-
-                let cycles = timeit(timer, || $FourierN.fft_in_place(xc));
-                hprintln!("- fourier:      {}", cycles).unwrap();
-            }
-        )*
-    };
+    #[fourier::static_fft(f32, 4)]
+    pub struct Fourier;
 }
 
-benches! {
-    2 => (bench_2, cfft_2, rfft_2, Fourier2),
-    4 => (bench_4, cfft_4, rfft_4, Fourier4),
-    8 => (bench_8, cfft_8, rfft_8, Fourier8),
-    16 => (bench_16, cfft_16, rfft_16, Fourier16),
-    32 => (bench_32, cfft_32, rfft_32, Fourier32),
-    64 => (bench_64, cfft_64, rfft_64, Fourier64),
-    128 => (bench_128, cfft_128, rfft_128, Fourier128),
-    256 => (bench_256, cfft_256, rfft_256, Fourier256),
-    512 => (bench_512, cfft_512, rfft_512, Fourier512),
-    1024 => (bench_1024, cfft_1024, rfft_1024, Fourier1024),
+#[cfg(feature = "n-8")]
+mod n {
+    pub const N: usize = 8;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_8;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_8;
+
+    #[fourier::static_fft(f32, 8)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-16")]
+mod n {
+    pub const N: usize = 16;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_16;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_16;
+
+    #[fourier::static_fft(f32, 16)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-32")]
+mod n {
+    pub const N: usize = 32;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_32;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_32;
+
+    #[fourier::static_fft(f32, 32)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-64")]
+mod n {
+    pub const N: usize = 64;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_64;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_64;
+
+    #[fourier::static_fft(f32, 64)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-128")]
+mod n {
+    pub const N: usize = 128;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_128;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_128;
+
+    #[fourier::static_fft(f32, 128)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-256")]
+mod n {
+    pub const N: usize = 256;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_256;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_256;
+
+    #[fourier::static_fft(f32, 256)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-512")]
+mod n {
+    pub const N: usize = 512;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_512;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_512;
+
+    #[fourier::static_fft(f32, 512)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-1024")]
+mod n {
+    pub const N: usize = 1024;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_1024;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_1024;
+
+    #[fourier::static_fft(f32, 1024)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-2048")]
+mod n {
+    pub const N: usize = 2048;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_2048;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_2048;
+
+    #[fourier::static_fft(f32, 2048)]
+    pub struct Fourier;
+}
+
+#[cfg(feature = "n-4096")]
+mod n {
+    pub const N: usize = 4096;
+    pub const CFFT: super::FnCfft = microfft::complex::cfft_4096;
+    pub const RFFT: super::FnRfft = microfft::real::rfft_4096;
+
+    #[fourier::static_fft(f32, 4096)]
+    pub struct Fourier;
 }
