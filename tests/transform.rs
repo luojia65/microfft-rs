@@ -14,7 +14,7 @@ fn approx_eq(a: Complex32, b: Complex32) -> bool {
     fn approx_f32(x: f32, y: f32) -> bool {
         let diff = (x - y).abs();
         let rel_diff = if x != 0. { (diff / x).abs() } else { diff };
-        rel_diff < 0.02
+        rel_diff < 0.03
     }
 
     approx_f32(a.re, b.re) && approx_f32(a.im, b.im)
